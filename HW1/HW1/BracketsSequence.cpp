@@ -40,9 +40,9 @@ bool isValid(std::string & parentheses, int * lastValidPosition)
         }
         stack.push_back(currentParenthesis);
     }
-
+/*
     *lastValidPosition = stack.size();
-    return 
+    return */
 }
 
 
