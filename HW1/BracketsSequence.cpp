@@ -30,7 +30,7 @@ bool isValid(std::string & parentheses, int * lastValidPosition)
         char currentParenthesis = parentheses[parenthesisPosition];
         if (isClosing(currentParenthesis))
         {
-            if (stack.back() != getMatchingOpening(currentParenthesis))
+            if (stack.empty() || stack.back() != getMatchingOpening(currentParenthesis))
             {
                 *lastValidPosition = parenthesisPosition;
                 return false;
@@ -40,13 +40,13 @@ bool isValid(std::string & parentheses, int * lastValidPosition)
         }
         stack.push_back(currentParenthesis);
     }
-/*
-    *lastValidPosition = stack.size();
-    return */
+
+    *lastValidPosition = sequenceLength;
+    return stack.empty();
 }
 
 
-int main()
+int mainB()
 {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(nullptr);
@@ -59,4 +59,5 @@ int main()
         std::cout << "CORRECT";
     else
         std::cout << lastValidPosition;
+    return 0;
 }

@@ -136,14 +136,14 @@ void Solve(std::vector<int>& numbers, std::vector<int>& bordersMoves, std::vecto
 }
 
 
-void Output(std::vector<int> & maxValues)
-{
-    int maxValuesCount = static_cast<int>(maxValues.size());
-    for (int i = 0; i < maxValuesCount; ++i)
-    {
-        std::cout << maxValues[i] << " ";
-    }
-}
+//void Output(std::vector<int> & maxValues)
+//{
+//    int maxValuesCount = static_cast<int>(maxValues.size());
+//    for (int i = 0; i < maxValuesCount; ++i)
+//    {
+//        std::cout << maxValues[i] << " ";
+//    }
+//}
 
 
 int mainD()
@@ -157,6 +157,6 @@ int mainD()
     
     Input(&numbers, &bordersMoves);
     Solve(numbers, bordersMoves, &maxValues);
-    Output(maxValues);
+    //Output(maxValues);
     return 0;
 }
