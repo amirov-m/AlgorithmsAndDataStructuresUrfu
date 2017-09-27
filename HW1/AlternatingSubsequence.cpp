@@ -1,6 +1,7 @@
 #include <iostream>
-#include <algorithm>
 #include <vector>
+#include <algorithm>
+#include <utility>
 
 
 void Input(std::vector<int> * numbers)
@@ -9,115 +10,105 @@ void Input(std::vector<int> * numbers)
     std::cin >> numbersCount;
     for (int i = 0; i < numbersCount; ++i)
     {
-        int number;
-        std::cin >> number;
-        numbers->push_back(number);
+        int currentNumber;
+        std::cin >> currentNumber;
+        numbers->push_back(currentNumber);
     }
 }
 
 
-void CountDP(std::vector<int> & numbers,
-    std::vector<int> * maxIncreasing,
-    std::vector<int> * maxDecreasing,
-    std::vector<int> * previousIncreasing,
-    std::vector<int> * previousDecreasing)
+void getExtremumsPositions(std::vector<int> & numbers, std::vector<int> * extremums)
 {
-    int numbersCount = static_cast<int>(numbers.size());
-    for (int currentPosition = 0; currentPosition < numbersCount; ++currentPosition)
+    std::vector<std::pair<int, int>> numbersWithouthRepeats;
+    for (int i = 0; i < numbers.size(); ++i)
     {
-        for (int previousPosition = 0; previousPosition < currentPosition; ++previousPosition)
+        if (numbersWithouthRepeats.size() == 0 ||
+            numbersWithouthRepeats.back().first != numbers[i])
         {
-            if (numbers[currentPosition] > numbers[previousPosition] &&
-                (*maxIncreasing)[currentPosition] <= (*maxDecreasing)[previousPosition])
-            {
-                (*maxIncreasing)[currentPosition] = (*maxDecreasing)[previousPosition] + 1;
-                (*previousIncreasing)[currentPosition] = previousPosition;
-            }
-            if (numbers[currentPosition] < numbers[previousPosition] &&
-                (*maxDecreasing)[currentPosition] <= (*maxIncreasing)[previousPosition])
-            {
-                (*maxDecreasing)[currentPosition] = (*maxIncreasing)[previousPosition] + 1;
-                (*previousDecreasing)[currentPosition] = previousPosition;
-            }
+            numbersWithouthRepeats.push_back(std::make_pair(numbers[i], i));
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(numbersWithouthRepeats.size()); ++i)
+    {
+        if (i == 0 || i == numbersWithouthRepeats.size() - 1 ||
+            (numbersWithouthRepeats[i - 1].first < numbersWithouthRepeats[i].first &&
+                numbersWithouthRepeats[i].first > numbersWithouthRepeats[i + 1].first) ||
+            numbersWithouthRepeats[i - 1].first > numbersWithouthRepeats[i].first &&
+            numbersWithouthRepeats[i].first < numbersWithouthRepeats[i + 1].first)
+        {
+            extremums->push_back(numbersWithouthRepeats[i].second);
         }
     }
 }
 
 
-bool less(std::vector<int> & first, std::vector<int> & second)
+bool middleIsExtremum(int left, int middle, int right)
 {
-    for (int i = 0; i < static_cast<int>(first.size()); ++i)
-    {
-        if (first[i] != second[i])
-            return first[i] < second[i];
-    }
-    return false;
+    return left < middle && middle > right || left > middle && middle < right;
 }
 
 
-void getSubsequence(
-    std::vector<int> & previousIncreasing,
-    std::vector<int> & previousDecreasing,
-    std::vector<int> * subsequence, int currentPosition, bool increases)
+void Solve(std::vector<int> & numbers, std::vector<int> * answer)
 {
-    while (currentPosition != -1)
+    std::vector<int> extremumPositions;
+    getExtremumsPositions(numbers, &extremumPositions);
+
+    if (extremumPositions.size() == 1)
     {
-        subsequence->push_back(currentPosition);
-        if (increases)
-        {
-            currentPosition = previousIncreasing[currentPosition];
-        }
-        else
-        {
-            currentPosition = previousDecreasing[currentPosition];
-        }
-        increases = !increases;
+        answer->push_back(numbers[extremumPositions[0]]);
+        return;
     }
-    std::reverse(subsequence->begin(), subsequence->end());
-}
 
+    std::vector<int> subsequencePositions;
+    subsequencePositions.push_back(0);
 
-void Solve(std::vector<int> & numbers, std::vector<int> * solution)
-{
-    int numbersCount = static_cast<int>(numbers.size());
-    std::vector<int> maxIncreasing(numbersCount, 1);
-    std::vector<int> maxDecreasing(numbersCount, 1);
-    std::vector<int> previousIncreasing(numbersCount, -1);
-    std::vector<int> previousDecreasing(numbersCount, -1);
-
-    CountDP(numbers, &maxIncreasing, &maxDecreasing, &previousIncreasing, &previousDecreasing);
-
-    std::vector<int> longestMinimalSequence;
-    std::vector<int> currentSubsequence;
-
-    for (int position = 0; position < numbersCount; ++position)
+    for (int curExtremum = 1;
+        curExtremum < static_cast<int>(extremumPositions.size()) - 1;
+        ++curExtremum)
     {
-        for (int j = 0; j < 2; ++j)
+        for (int j = subsequencePositions.back() + 1; j <= extremumPositions[curExtremum]; ++j)
         {
-            currentSubsequence.clear();
-            getSubsequence(previousIncreasing, previousDecreasing, 
-                &currentSubsequence, position, j == 0);
-            if (currentSubsequence.size() < longestMinimalSequence.size())
-                continue;
-            if (currentSubsequence.size() > longestMinimalSequence.size() ||
-                less(currentSubsequence, longestMinimalSequence))
+            if (numbers[subsequencePositions.back()] < numbers[j] &&
+                numbers[j] > numbers[extremumPositions[curExtremum + 1]] &&
+                numbers[extremumPositions[curExtremum]] > numbers[subsequencePositions.back()] ||
+                numbers[subsequencePositions.back()] > numbers[j] &&
+                numbers[j] < numbers[extremumPositions[curExtremum + 1]] &&
+                numbers[extremumPositions[curExtremum]] < numbers[subsequencePositions.back()])
             {
-                std::swap(longestMinimalSequence, currentSubsequence);
+                subsequencePositions.push_back(j);
+                break;
             }
         }
     }
 
-    for (int i = 0; i < static_cast<int>(longestMinimalSequence.size()); ++i) {
-        solution->push_back(numbers[longestMinimalSequence[i]]);
+
+
+    for (int i = extremumPositions[extremumPositions.size() - 2] + 1; i < numbers.size(); ++i)
+    {
+        if (numbers[i] == numbers[i - 1])
+            continue;
+        if (subsequencePositions.size() == 1 ||
+            middleIsExtremum(numbers[subsequencePositions[subsequencePositions.size() - 2]],
+                numbers[subsequencePositions.back()], numbers[i]))
+        {
+            subsequencePositions.push_back(i);
+            break;
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(subsequencePositions.size()); ++i)
+    {
+        answer->push_back(numbers[subsequencePositions[i]]);
     }
 }
 
 
-void Output(std::vector<int> & solution)
+void Output(std::vector<int> & answer)
 {
-    for (int i = 0; i < static_cast<int>(solution.size()); ++i)
+    for (int i = 0; i < static_cast<int>(answer.size()); ++i)
     {
-        std::cout << solution[i] << " ";
+        std::cout << answer[i] << " ";
     }
 }
 
@@ -128,12 +119,10 @@ int main()
     std::cin.tie(nullptr);
 
     std::vector<int> numbers;
+    std::vector<int> answer;
+
     Input(&numbers);
+    Solve(numbers, &answer);
+    Output(answer);
 
-    std::vector<int> solution;
-    Solve(numbers, &solution);
-
-    Output(solution);
-
-    return 0;
 }
