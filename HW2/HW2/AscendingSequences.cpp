@@ -76,12 +76,12 @@ public:
         return toReturn;
     }
 
-    bool empty() const
+    bool empty()
     {
         return heap.empty();
     }
 
-    int size() const
+    int size()
     {
         return static_cast<int>(heap.size());
     }

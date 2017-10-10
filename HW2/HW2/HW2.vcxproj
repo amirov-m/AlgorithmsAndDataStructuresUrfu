@@ -140,6 +140,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AscendingSequences.cpp" />
+    <ClCompile Include="FootballTeam.cpp" />
+    <ClCompile Include="FootballTeamCopy.cpp" />
+    <ClCompile Include="LongestCommonSubsequence.cpp" />
+    <ClCompile Include="MinimumRadius.cpp" />
+    <ClCompile Include="TemplateTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="in.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
